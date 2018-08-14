@@ -215,6 +215,7 @@ class DayView extends View {
         drawDayText(canvas);
         drawBottomText(canvas);
 
+
     }
 
     /**

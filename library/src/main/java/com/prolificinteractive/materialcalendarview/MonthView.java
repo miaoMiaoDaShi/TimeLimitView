@@ -16,7 +16,6 @@ class MonthView extends CalendarPagerView {
     public MonthView(@NonNull MaterialCalendarView view, CalendarDay month,
                      int firstDayOfWeek, boolean showWeekDays) {
         super(view, month, firstDayOfWeek, showWeekDays);
-        setClipChildren(false);
     }
 
     @Override
