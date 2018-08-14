@@ -1497,6 +1497,8 @@ public class MaterialCalendarView extends ViewGroup {
                         date.setStrat(false);
                         date.setEnd(false);
                     }
+                    firstDaySelected.setEndChecked(true);
+                    adapter.setDateSelected(firstDaySelected, nowSelected);
                     adapter.setDateSelected(date, nowSelected);
                     if (firstDaySelected.equals(date)) {
                         // Right now, we are not supporting a range of one day, so we are removing the day instead.

@@ -113,6 +113,11 @@ class DayView extends View {
      */
     private boolean mIsChecked = false;
 
+    /**
+     * 已经选择了结束时间
+     */
+    private boolean mIsEndChecked = false;
+
 
     @ShowOtherDates
     private int showOtherDates = MaterialCalendarView.SHOW_DEFAULTS;
@@ -209,6 +214,7 @@ class DayView extends View {
         super.onDraw(canvas);
         mIsStrat = date.isStrat();
         mIsEnd = date.isEnd();
+        mIsEndChecked = date.isEndChecked();
 
         drawBackground(canvas);
 
@@ -241,7 +247,7 @@ class DayView extends View {
 
         if ((mIsChecked && mIsStrat)) {
             canvas.drawCircle(mCircleX, mCircleY, mCircleX, mBackgroundPaint);
-            if (!mIsLeft) {
+            if (!mIsLeft&&mIsEndChecked) {
 
                 canvas.drawRect(mLeftBackgroundRect, mBackgroundPaint);
             }

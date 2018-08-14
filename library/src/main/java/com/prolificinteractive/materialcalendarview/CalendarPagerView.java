@@ -171,8 +171,6 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
                 dayView.setDay(dates.get(dates.indexOf(day)));
             }
             dayView.setChecked(dates != null && dates.contains(day));
-
-            Log.i(TAG, "setSelectedDates: " + dayView.toString() + "\n");
         }
         postInvalidate();
     }

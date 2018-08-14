@@ -23,7 +23,16 @@ public final class CalendarDay implements Parcelable {
      */
     private boolean mIsEnd = false;
 
+    private boolean mIsEndChecked = false;
 
+
+    public boolean isEndChecked() {
+        return mIsEndChecked;
+    }
+
+    public void setEndChecked(boolean endChecked) {
+        mIsEndChecked = endChecked;
+    }
 
     public boolean isStrat() {
         return mIsStrat;
@@ -302,6 +311,7 @@ public final class CalendarDay implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte(this.mIsStrat ? (byte) 1 : (byte) 0);
         dest.writeByte(this.mIsEnd ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.mIsEndChecked ? (byte) 1 : (byte) 0);
         dest.writeInt(this.year);
         dest.writeInt(this.month);
         dest.writeInt(this.day);
@@ -310,6 +320,7 @@ public final class CalendarDay implements Parcelable {
     protected CalendarDay(Parcel in) {
         this.mIsStrat = in.readByte() != 0;
         this.mIsEnd = in.readByte() != 0;
+        this.mIsEndChecked = in.readByte() != 0;
         this.year = in.readInt();
         this.month = in.readInt();
         this.day = in.readInt();
