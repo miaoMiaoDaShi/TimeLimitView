@@ -18,6 +18,7 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -237,6 +239,7 @@ public class MaterialCalendarView extends ViewGroup {
     private boolean allowClickDaysOutsideCurrentMonth = true;
     private int firstDayOfWeek;
     private boolean showWeekDays;
+    private View mHintView;
 
     private State state;
 
@@ -400,7 +403,10 @@ public class MaterialCalendarView extends ViewGroup {
             monthView.setShowOtherDates(getShowOtherDates());
             addView(monthView, new LayoutParams(calendarMode.visibleWeeksCount + DAY_NAMES_ROW));
         }
+
+
     }
+
 
     private void setupChildren() {
         topbar = new LinearLayout(getContext());
@@ -425,7 +431,22 @@ public class MaterialCalendarView extends ViewGroup {
         pager.setId(R.id.mcv_pager);
         pager.setOffscreenPageLimit(1);
         int tileHeight = showWeekDays ? calendarMode.visibleWeeksCount + DAY_NAMES_ROW : calendarMode.visibleWeeksCount;
-        addView(pager, new LayoutParams(tileHeight));
+
+
+        final RelativeLayout relativeLayout = new RelativeLayout(getContext());
+        relativeLayout.addView(pager, new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+        relativeLayout.addView(buildHintView(), new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
+        //addView(pager, new LayoutParams(tileHeight));
+        addView(relativeLayout, new LayoutParams(tileHeight));
+    }
+
+    private View buildHintView() {
+        mHintView = LayoutInflater.from(getContext()).inflate(R.layout.pop_hint, this, false);
+        return mHintView;
+    }
+
+    public View getHintView() {
+        return mHintView;
     }
 
     private void updateUi() {
@@ -1497,7 +1518,8 @@ public class MaterialCalendarView extends ViewGroup {
                         date.setStrat(false);
                         date.setEnd(false);
                     }
-                    firstDaySelected.setEndChecked(true);
+
+                    firstDaySelected.setEndChecked(nowSelected);
                     adapter.setDateSelected(firstDaySelected, nowSelected);
                     adapter.setDateSelected(date, nowSelected);
                     if (firstDaySelected.equals(date)) {

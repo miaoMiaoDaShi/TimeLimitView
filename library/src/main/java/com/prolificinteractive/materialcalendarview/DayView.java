@@ -122,6 +122,9 @@ class DayView extends View {
     @ShowOtherDates
     private int showOtherDates = MaterialCalendarView.SHOW_DEFAULTS;
 
+    @MaterialCalendarView.SelectionMode
+    private int selectionMode = 0;
+
 
     public DayView(Context context, CalendarDay day) {
         super(context);
@@ -161,6 +164,11 @@ class DayView extends View {
     public void setDay(CalendarDay date) {
         this.date = date;
         mCurrentDay = String.valueOf(date.getDay());
+    }
+
+
+    public void setSelectionMode(final @MaterialCalendarView.SelectionMode int mode) {
+        this.selectionMode = mode;
     }
 
 
@@ -231,36 +239,83 @@ class DayView extends View {
      */
     private void drawBackground(Canvas canvas) {
 
-        //判断是否是开始 或结束
-        if (mIsChecked && mIsLeft) {
-            //画左半圆
-            canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mBackgroundPaint);
-            canvas.drawRect(mLeftBackgroundRect, mBackgroundPaint);
-        } else if (mIsChecked && mIsRight) {
-            //画右边的半圆
-            canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mBackgroundPaint);
-            canvas.drawRect(mRightBackgroundRect, mBackgroundPaint);
-        } else if (!mIsStrat && mIsChecked && !mIsEnd) {
-            //选中 普通状态//正方形
-            canvas.drawRect(mBackgroundRect, mBackgroundPaint);
+
+        if (mIsChecked) {
+            if (selectionMode == MaterialCalendarView.SELECTION_MODE_RANGE) {//范围选中
+
+                //一共有以下的状态
+                //1.左边 ,开始,,没有选中结束
+                if (mIsLeft && mIsStrat && !mIsEndChecked) {
+                    //画左半圆
+                    canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+                } else if (mIsLeft && mIsStrat && mIsEndChecked) {//左边  开始 ,选择了结束
+                    canvas.drawRect(mLeftBackgroundRect, mBackgroundPaint);
+                    canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+                } else if (mIsRight && mIsStrat) {//右边 ,开始,,没有
+                    canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+
+                } else if (mIsLeft && mIsEnd) {//左边,结束
+                    canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+                } else if (mIsRight && mIsEnd) {//右边结束
+                    canvas.drawRect(mRightBackgroundRect, mBackgroundPaint);
+                    canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+                } else if ((mIsRight || mIsLeft) && !mIsStrat && !mIsEnd) {//是左边 或者右边,非结束 开始
+                    if (mIsLeft) {
+                        canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mBackgroundPaint);
+                        canvas.drawRect(mLeftBackgroundRect, mBackgroundPaint);
+                    } else if (mIsRight) {
+                        canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mBackgroundPaint);
+                        canvas.drawRect(mRightBackgroundRect, mBackgroundPaint);
+                    }
+                } else if (!mIsLeft && !mIsRight) {//不是左边 右边
+                    if (mIsStrat && !mIsEndChecked) {//开始 没有选中结束
+                        canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+                    } else if (mIsStrat && mIsEndChecked) {////开始 选中结束
+                        canvas.drawRect(mLeftBackgroundRect, mBackgroundPaint);
+                        canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+                    } else if (mIsEnd) {
+                        canvas.drawRect(mRightBackgroundRect, mBackgroundPaint);
+                        canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+                    } else {
+                        canvas.drawRect(mBackgroundRect, mBackgroundPaint);
+                    }
+                }
+            } else if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {//单选
+                canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+            }
         }
 
-        if ((mIsChecked && mIsStrat)) {
-            canvas.drawCircle(mCircleX, mCircleY, mCircleX, mBackgroundPaint);
-            if (!mIsLeft&&mIsEndChecked) {
 
-                canvas.drawRect(mLeftBackgroundRect, mBackgroundPaint);
-            }
-            canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
-
-        } else if ((mIsChecked && mIsEnd)) {
-            canvas.drawCircle(mCircleX, mCircleY, mCircleX, mBackgroundPaint);
-            if (!mIsRight) {
-
-                canvas.drawRect(mRightBackgroundRect, mBackgroundPaint);
-            }
-            canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
-        }
+//
+//        //判断是否是开始 或结束
+//        if (mIsChecked && mIsLeft) {
+//
+//        } else if (mIsChecked && mIsRight) {
+//            //画右边的半圆
+//            canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mBackgroundPaint);
+//            canvas.drawRect(mRightBackgroundRect, mBackgroundPaint);
+//        } else if (!mIsStrat && mIsChecked && !mIsEnd) {
+//            //选中 普通状态//正方形//单选为圆
+//            if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {
+//                canvas.drawRect(mBackgroundRect, mBackgroundPaint);
+//            }
+//        }
+//        if ((mIsChecked && mIsStrat)) {
+//            canvas.drawCircle(mCircleX, mCircleY, mCircleX, mBackgroundPaint);
+//            if (!mIsLeft && mIsEndChecked && !mIsRight) {
+//
+//                canvas.drawRect(mLeftBackgroundRect, mBackgroundPaint);
+//            }
+//            canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+//
+//        } else if ((mIsChecked && mIsEnd)) {
+//            canvas.drawCircle(mCircleX, mCircleY, mCircleX, mBackgroundPaint);
+//            if (!mIsRight) {
+//
+//                canvas.drawRect(mRightBackgroundRect, mBackgroundPaint);
+//            }
+//            canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
+//        }
 
     }
 
@@ -288,7 +343,7 @@ class DayView extends View {
         Paint.FontMetricsInt fontMetrics = mDayTextPaint.getFontMetricsInt();
         int baseline = (mDayTextRect.bottom + mDayTextRect.top - fontMetrics.bottom - fontMetrics.top) / 2;
         mDayTextPaint.setTextAlign(Paint.Align.CENTER);
-        if (mIsStrat || mIsEnd) {//开始 或者是结束
+        if (mIsStrat || mIsEnd || (mIsChecked && selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE)) {//开始 或者是结束
             mDayTextPaint.setColor(Color.WHITE);
         } else if (isInMonth) {//当前月份
             mDayTextPaint.setColor(Color.parseColor(COLOR_CURRENT_MONTH_DYA_TEXT));

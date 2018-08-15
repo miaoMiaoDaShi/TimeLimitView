@@ -4,10 +4,14 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.PopupWindow;
 
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView.ShowOtherDates;
 import com.prolificinteractive.materialcalendarview.format.DayFormatter;
@@ -41,6 +45,7 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
     private int firstDayOfWeek;
     protected boolean showWeekDays;
 
+
     private final Collection<DayView> dayViews = new ArrayList<>();
 
 
@@ -71,6 +76,8 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
         buildDayViews(dayViews, resetAndGetWorkingCalendar());
     }
 
+
+
     private void buildWeekDays(Calendar calendar) {
         for (int i = 0; i < DEFAULT_DAYS_IN_WEEK; i++) {
             WeekDayView weekDayView = new WeekDayView(getContext(), CalendarUtils.getDayOfWeek(calendar));
@@ -86,6 +93,7 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
     protected void addDayView(Collection<DayView> dayViews, Calendar calendar) {
         CalendarDay day = CalendarDay.from(calendar);
         DayView dayView = new DayView(getContext(), day);
+        dayView.setSelectionMode(mcv.getSelectionMode());
         dayView.setOnClickListener(this);
         dayView.setOnLongClickListener(this);
         dayViews.add(dayView);
@@ -165,12 +173,16 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
     private static final String TAG = "CalendarPagerView";
 
     public void setSelectedDates(ArrayList<CalendarDay> dates) {
+        final int[] location = new int[2];
         for (DayView dayView : dayViews) {
             CalendarDay day = dayView.getDate();
+
             if (dates.contains(day)) {
                 dayView.setDay(dates.get(dates.indexOf(day)));
             }
             dayView.setChecked(dates != null && dates.contains(day));
+
+
         }
         postInvalidate();
     }

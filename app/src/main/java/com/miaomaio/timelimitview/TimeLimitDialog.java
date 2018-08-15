@@ -25,7 +25,6 @@ import java.util.Objects;
  * Description :
  */
 public class TimeLimitDialog extends DialogFragment {
-    private MaterialCalendarView mMaterialCalendarView;
 
     public static TimeLimitDialog newInstance() {
 
@@ -63,17 +62,17 @@ public class TimeLimitDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mMaterialCalendarView = view.findViewById(R.id.mMaterialCalendarView);
+        MaterialCalendarView materialCalendarView = view.findViewById(R.id.mMaterialCalendarView);
 
-        mMaterialCalendarView.setWeekDayLabels(new String[]{"日", "一", "二", "三", "四", "五", "六"});
-        mMaterialCalendarView.setTitleFormatter(new TitleFormatter() {
+        materialCalendarView.setWeekDayLabels(new String[]{"日", "一", "二", "三", "四", "五", "六"});
+        materialCalendarView.setTitleFormatter(new TitleFormatter() {
             @Override
             public CharSequence format(CalendarDay day) {
                 return String.format("%s年%s月", day.getYear(), day.getMonth() + 1);
             }
         });
-        mMaterialCalendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
-        mMaterialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+        materialCalendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
+        materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
 
 
     }
