@@ -173,7 +173,6 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
     private static final String TAG = "CalendarPagerView";
 
     public void setSelectedDates(ArrayList<CalendarDay> dates) {
-        final int[] location = new int[2];
         for (DayView dayView : dayViews) {
             CalendarDay day = dayView.getDate();
 
@@ -209,11 +208,13 @@ abstract class CalendarPagerView extends ViewGroup implements View.OnClickListen
         }
     }
 
+
     @Override
     public void onClick(final View v) {
         if (v instanceof DayView) {
             final DayView dayView = (DayView) v;
             mcv.onDateClicked(dayView);
+            Log.i(TAG, "onClick: "+dayView.toString());
         }
     }
 

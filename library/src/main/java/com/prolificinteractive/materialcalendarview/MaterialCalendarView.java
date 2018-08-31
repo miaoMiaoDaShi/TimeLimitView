@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -36,6 +37,10 @@ import com.prolificinteractive.materialcalendarview.format.DayFormatter;
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -250,6 +255,8 @@ public class MaterialCalendarView extends ViewGroup {
     public MaterialCalendarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        EventBus.getDefault().register(this);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             //If we're on good Android versions, turn off clipping for cool effects
             setClipToPadding(false);
@@ -407,6 +414,14 @@ public class MaterialCalendarView extends ViewGroup {
 
     }
 
+
+    private static final String TAG = "MaterialCalendarView";
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onLocationEvent(LocationEvent event) {
+        Log.i(TAG, "onLocationEvent: "+event.toString());
+        mHintView.setTranslationX(event.getLocation()[0]);
+        mHintView.setTranslationY(event.getLocation()[1]+topbar.getHeight());
+    }
 
     private void setupChildren() {
         topbar = new LinearLayout(getContext());
@@ -1479,7 +1494,7 @@ public class MaterialCalendarView extends ViewGroup {
      * @param date        date of the day that was clicked
      * @param nowSelected true if the date is now selected, false otherwise
      */
-    protected void onDateClicked(@NonNull CalendarDay date, boolean nowSelected) {
+    protected void onDateClicked(@NonNull CalendarDay date, boolean nowSelected,final DayView dayView) {
         switch (selectionMode) {
             case SELECTION_MODE_MULTIPLE: {
                 adapter.setDateSelected(date, nowSelected);
@@ -1498,6 +1513,7 @@ public class MaterialCalendarView extends ViewGroup {
                         date.setStrat(false);
                         date.setEnd(false);
                     }
+
 
                     adapter.setDateSelected(date, nowSelected);
                     dispatchOnDateSelected(date, nowSelected);
@@ -1542,6 +1558,14 @@ public class MaterialCalendarView extends ViewGroup {
                     adapter.setDateSelected(date, nowSelected);
                     dispatchOnDateSelected(date, nowSelected);
                 }
+
+                Log.i(TAG, "onDateClicked: ");
+//                if (date.isStrat() || date.isEnd()) {//开始
+//                    final int locations[] = new int[2];
+//                    locations[0] = (int) dayView.getX();
+//                    locations[1] = (int) dayView.getY();
+//                    EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd()));
+//                }
             }
             break;
             default:
@@ -1589,7 +1613,7 @@ public class MaterialCalendarView extends ViewGroup {
                 goToNext();
             }
         }
-        onDateClicked(dayView.getDate(), !dayView.isChecked());
+        onDateClicked(dayView.getDate(), !dayView.isChecked(),dayView);
 
     }
 
@@ -1938,6 +1962,12 @@ public class MaterialCalendarView extends ViewGroup {
             return new StateBuilder(this);
         }
 
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        EventBus.getDefault().unregister(this);
     }
 
     public class StateBuilder {

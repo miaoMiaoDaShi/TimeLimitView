@@ -16,10 +16,13 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView.ShowOtherDates;
 import com.prolificinteractive.materialcalendarview.format.DayFormatter;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Calendar;
 
@@ -164,6 +167,8 @@ class DayView extends View {
     public void setDay(CalendarDay date) {
         this.date = date;
         mCurrentDay = String.valueOf(date.getDay());
+
+
     }
 
 
@@ -217,11 +222,40 @@ class DayView extends View {
 
     private Paint mBottomTextPaint;
 
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        mIsStrat = date.isStrat();
+        mIsEnd = date.isEnd();
+
+        if (date.isStrat() || date.isEnd()) {//开始
+            final int locations[] = new int[2];
+            locations[0] = (int) getX();
+            locations[1] = (int) getY();
+            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd()));
+        }
+    }
+
+    @Override
+    public void postInvalidate() {
+        super.postInvalidate();
+        mIsStrat = date.isStrat();
+        mIsEnd = date.isEnd();
+
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        return super.onTouchEvent(event);
+    }
+
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
-        mIsStrat = date.isStrat();
-        mIsEnd = date.isEnd();
+
+
         mIsEndChecked = date.isEndChecked();
 
         drawBackground(canvas);
