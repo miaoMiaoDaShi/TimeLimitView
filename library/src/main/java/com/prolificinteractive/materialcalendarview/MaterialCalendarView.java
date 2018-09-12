@@ -213,10 +213,29 @@ public class MaterialCalendarView extends ViewGroup {
             updateUi();
 
             dispatchOnMonthChanged(currentMonth);
+
+
         }
 
         @Override
         public void onPageScrollStateChanged(int state) {
+            switch (state) {
+                case ViewPager.SCROLL_STATE_IDLE:
+                    Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_IDLE");
+                    if (getSelectedDates().size() > 0 && getSelectedDates().get(getSelectedDates().size() - 1).getMonth() == currentMonth.getMonth()) {
+                        mHintView.setVisibility(VISIBLE);
+                    }
+                    break;
+                case ViewPager.SCROLL_STATE_DRAGGING:
+                    Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_DRAGGING");
+                    mHintView.setVisibility(INVISIBLE);
+                    break;
+                case ViewPager.SCROLL_STATE_SETTLING:
+                    Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_SETTLING");
+
+                    break;
+
+            }
         }
 
         @Override
@@ -420,8 +439,31 @@ public class MaterialCalendarView extends ViewGroup {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onLocationEvent(LocationEvent event) {
         Log.i(TAG, "onLocationEvent: " + event.toString());
-        mHintView.setTranslationX(event.getLocation()[0]-(mHintView.getWidth()-event.getDayViewWidth())/2);
-        mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight()/2);
+
+        if (event.isStart()) {//开始
+            ((TextView) mHintView.findViewById(R.id.tvTitle)).setText("选择结束日期");
+        } else if (event.isEnd()) {
+            final int day = (int) ((getSelectedDates().get(getSelectedDates().size() - 1).getCalendar().getTimeInMillis() -
+                    getSelectedDates().get(0).getCalendar().getTimeInMillis()) / 1000 / 60 / 60 / 24);
+            ((TextView) mHintView.findViewById(R.id.tvTitle)).setText(day + "天");
+        }
+
+        mHintView.post(new Runnable() {
+            @Override
+            public void run() {
+                if (event.isLeft()) {
+                    mHintView.setTranslationX(event.getLocation()[0]);
+                }else if (event.isRight()){
+                    mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()));
+                } else {
+                    mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()) / 2);
+                }
+
+            }
+        });
+
+
+        mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight() / 2);
     }
 
     private void setupChildren() {
@@ -1444,6 +1486,7 @@ public class MaterialCalendarView extends ViewGroup {
      * @param selected true if the day is now currently selected, false otherwise
      */
     protected void dispatchOnDateSelected(final CalendarDay day, final boolean selected) {
+        mHintView.setVisibility(getSelectedDates().size() > 0 ? VISIBLE : INVISIBLE);
         if (listener != null) {
             listener.onDateSelected(MaterialCalendarView.this, day, selected);
         }
@@ -1549,6 +1592,8 @@ public class MaterialCalendarView extends ViewGroup {
                 } else {
                     // Clearing selection and making a selection of the new date.
                     adapter.clearSelections();
+
+
                     if (nowSelected) {
                         date.setStrat(true);
                         date.setEnd(false);

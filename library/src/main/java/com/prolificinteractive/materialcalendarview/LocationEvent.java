@@ -12,7 +12,25 @@ public class LocationEvent {
     private int location[];
     private boolean isStart;
     private boolean isEnd;
+    private boolean isLeft;
+    private boolean isRight;
     private int dayViewWidth;
+
+    public boolean isLeft() {
+        return isLeft;
+    }
+
+    public void setLeft(boolean left) {
+        isLeft = left;
+    }
+
+    public boolean isRight() {
+        return isRight;
+    }
+
+    public void setRight(boolean right) {
+        isRight = right;
+    }
 
     public int getDayViewWidth() {
         return dayViewWidth;
@@ -46,10 +64,12 @@ public class LocationEvent {
         isStart = start;
     }
 
-    public LocationEvent(int[] location, boolean isStart, boolean isEnd, int dayViewWidth) {
+    public LocationEvent(int[] location, boolean isStart, boolean isEnd, boolean isLeft, boolean isRight, int dayViewWidth) {
         this.location = location;
         this.isStart = isStart;
         this.isEnd = isEnd;
+        this.isLeft = isLeft;
+        this.isRight = isRight;
         this.dayViewWidth = dayViewWidth;
     }
 
@@ -59,6 +79,9 @@ public class LocationEvent {
                 "location=" + Arrays.toString(location) +
                 ", isStart=" + isStart +
                 ", isEnd=" + isEnd +
+                ", isLeft=" + isLeft +
+                ", isRight=" + isRight +
+                ", dayViewWidth=" + dayViewWidth +
                 '}';
     }
 }

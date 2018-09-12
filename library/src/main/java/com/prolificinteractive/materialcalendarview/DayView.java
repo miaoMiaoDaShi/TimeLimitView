@@ -232,7 +232,7 @@ class DayView extends View {
             final int locations[] = new int[2];
             locations[0] = (int) getX();
             locations[1] = (int) getY();
-            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(),getWidth()));
+            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(),mIsLeft,mIsRight,getWidth()));
         }
     }
 
