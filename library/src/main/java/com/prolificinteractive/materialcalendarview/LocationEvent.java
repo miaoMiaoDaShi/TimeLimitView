@@ -12,6 +12,15 @@ public class LocationEvent {
     private int location[];
     private boolean isStart;
     private boolean isEnd;
+    private int dayViewWidth;
+
+    public int getDayViewWidth() {
+        return dayViewWidth;
+    }
+
+    public void setDayViewWidth(int dayViewWidth) {
+        this.dayViewWidth = dayViewWidth;
+    }
 
     public boolean isEnd() {
         return isEnd;
@@ -37,10 +46,11 @@ public class LocationEvent {
         isStart = start;
     }
 
-    public LocationEvent(int[] location, boolean isStart, boolean isEnd) {
+    public LocationEvent(int[] location, boolean isStart, boolean isEnd, int dayViewWidth) {
         this.location = location;
         this.isStart = isStart;
         this.isEnd = isEnd;
+        this.dayViewWidth = dayViewWidth;
     }
 
     @Override

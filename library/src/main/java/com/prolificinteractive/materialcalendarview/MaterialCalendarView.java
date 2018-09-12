@@ -416,11 +416,12 @@ public class MaterialCalendarView extends ViewGroup {
 
 
     private static final String TAG = "MaterialCalendarView";
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onLocationEvent(LocationEvent event) {
-        Log.i(TAG, "onLocationEvent: "+event.toString());
-        mHintView.setTranslationX(event.getLocation()[0]);
-        mHintView.setTranslationY(event.getLocation()[1]+topbar.getHeight());
+        Log.i(TAG, "onLocationEvent: " + event.toString());
+        mHintView.setTranslationX(event.getLocation()[0]-(mHintView.getWidth()-event.getDayViewWidth())/2);
+        mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight()/2);
     }
 
     private void setupChildren() {
@@ -1494,7 +1495,7 @@ public class MaterialCalendarView extends ViewGroup {
      * @param date        date of the day that was clicked
      * @param nowSelected true if the date is now selected, false otherwise
      */
-    protected void onDateClicked(@NonNull CalendarDay date, boolean nowSelected,final DayView dayView) {
+    protected void onDateClicked(@NonNull CalendarDay date, boolean nowSelected, final DayView dayView) {
         switch (selectionMode) {
             case SELECTION_MODE_MULTIPLE: {
                 adapter.setDateSelected(date, nowSelected);
@@ -1605,15 +1606,20 @@ public class MaterialCalendarView extends ViewGroup {
         final CalendarDay selectedDate = dayView.getDate();
         final int currentMonth = currentDate.getMonth();
         final int selectedMonth = selectedDate.getMonth();
+        if (currentMonth != selectedMonth) {
+            return;
+        }
 
         if (calendarMode == CalendarMode.MONTHS
                 && allowClickDaysOutsideCurrentMonth
                 && currentMonth != selectedMonth) {
             if (currentDate.isBefore(selectedDate)) {
-                goToNext();
+                //goToNext();
+            } else if (currentDate.isAfter(selectedDate)) {
+                // goToPrevious();
             }
         }
-        onDateClicked(dayView.getDate(), !dayView.isChecked(),dayView);
+        onDateClicked(dayView.getDate(), !dayView.isChecked(), dayView);
 
     }
 
