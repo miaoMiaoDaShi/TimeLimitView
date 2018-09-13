@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:visibility="invisible"
-    tools:visibility="visible"
-    android:orientation="vertical">
+    android:alpha="0"
+    android:orientation="vertical"
+    tools:alpha="1">
 
-   <LinearLayout
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:gravity="center">
-       <TextView
-           android:id="@+id/tvTitle"
-           android:paddingRight="5dp"
-           android:paddingLeft="5dp"
-           android:paddingTop="2dp"
-           android:paddingBottom="2dp"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"
-           android:textColor="@android:color/white"
-           android:background="@drawable/shape_bg_hint"
-           android:textSize="15sp"
-           tools:text="哈哈哈哈啊哈"/>
-   </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shape_bg_hint"
+            android:paddingBottom="2dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="2dp"
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            tools:text="哈哈哈哈啊哈" />
+    </LinearLayout>
 </LinearLayout>

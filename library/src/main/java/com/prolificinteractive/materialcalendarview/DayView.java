@@ -228,11 +228,16 @@ class DayView extends View {
         super.invalidate();
         mIsStrat = date.isStrat();
         mIsEnd = date.isEnd();
+
+
+        if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {
+            return;
+        }
         if (date.isStrat() || date.isEnd()) {//开始
             final int locations[] = new int[2];
             locations[0] = (int) getX();
             locations[1] = (int) getY();
-            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(),mIsLeft,mIsRight,getWidth()));
+            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(), mIsLeft, mIsRight, getWidth()));
         }
     }
 

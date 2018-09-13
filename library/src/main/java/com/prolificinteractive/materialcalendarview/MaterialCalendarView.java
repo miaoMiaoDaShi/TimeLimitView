@@ -223,12 +223,12 @@ public class MaterialCalendarView extends ViewGroup {
                 case ViewPager.SCROLL_STATE_IDLE:
                     Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_IDLE");
                     if (getSelectedDates().size() > 0 && getSelectedDates().get(getSelectedDates().size() - 1).getMonth() == currentMonth.getMonth()) {
-                        mHintView.setVisibility(VISIBLE);
+                        mHintView.animate().alpha(1);
                     }
                     break;
                 case ViewPager.SCROLL_STATE_DRAGGING:
                     Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_DRAGGING");
-                    mHintView.setVisibility(INVISIBLE);
+                    mHintView.animate().alpha(0);
                     break;
                 case ViewPager.SCROLL_STATE_SETTLING:
                     Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_SETTLING");
@@ -453,7 +453,7 @@ public class MaterialCalendarView extends ViewGroup {
             public void run() {
                 if (event.isLeft()) {
                     mHintView.setTranslationX(event.getLocation()[0]);
-                }else if (event.isRight()){
+                } else if (event.isRight()) {
                     mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()));
                 } else {
                     mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()) / 2);
@@ -1486,7 +1486,7 @@ public class MaterialCalendarView extends ViewGroup {
      * @param selected true if the day is now currently selected, false otherwise
      */
     protected void dispatchOnDateSelected(final CalendarDay day, final boolean selected) {
-        mHintView.setVisibility(getSelectedDates().size() > 0 ? VISIBLE : INVISIBLE);
+        mHintView.animate().alpha(getSelectedDates().size() > 0 && selectionMode == SELECTION_MODE_RANGE ? 1 : 0);
         if (listener != null) {
             listener.onDateSelected(MaterialCalendarView.this, day, selected);
         }
