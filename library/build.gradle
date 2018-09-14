@@ -6,7 +6,7 @@ publish {
     groupId = 'com.miaomiao'         //compile引用时的第1部分groupId
     artifactId = 'time-limit-view'     //compile引用时的第2部分项目名
     repoName = 'time-limit-view'
-    publishVersion = '1.0.0'    //compile引用时的第3部分版本号
+    publishVersion = '1.0.1'    //compile引用时的第3部分版本号
     desc = 'One time period selection control'
     website = 'https://github.com/miaoMiaoDaShi/TimeLimitView'
 
@@ -15,7 +15,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion 22
+        minSdkVersion 14
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"

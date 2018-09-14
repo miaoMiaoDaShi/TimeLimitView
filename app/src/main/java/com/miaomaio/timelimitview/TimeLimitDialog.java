@@ -16,6 +16,8 @@ import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Objects;
 
 /**
@@ -71,8 +73,31 @@ public class TimeLimitDialog extends DialogFragment {
                 return String.format("%s年%s月", day.getYear(), day.getMonth() + 1);
             }
         });
-        materialCalendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
-        materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+        try {
+            final long startTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-14").getTime();
+            final long endTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-18").getTime();
+
+
+
+            CalendarDay startCalendarDay = CalendarDay.from(startTime);
+            CalendarDay endCalendarDay = CalendarDay.from(endTime);
+
+            materialCalendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
+            materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+
+            materialCalendarView.post(new Runnable() {
+                @Override
+                public void run() {
+                    materialCalendarView.onDateClicked(startCalendarDay,true);
+                    materialCalendarView.onDateClicked(endCalendarDay,true);
+                }
+            });
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
 
 
     }

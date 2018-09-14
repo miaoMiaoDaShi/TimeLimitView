@@ -26,6 +26,12 @@ public final class CalendarDay implements Parcelable {
     private boolean mIsEndChecked = false;
 
 
+    /**
+     * 同一天
+     */
+    private boolean mIsTheSameDay = false;
+
+
     public boolean isEndChecked() {
         return mIsEndChecked;
     }
@@ -51,6 +57,13 @@ public final class CalendarDay implements Parcelable {
     }
 
 
+    public boolean isTheSameDay() {
+        return mIsTheSameDay;
+    }
+
+    public void setTheSameDay(boolean theSameDay) {
+        mIsTheSameDay = theSameDay;
+    }
 
     /**
      * Get a new instance set to today

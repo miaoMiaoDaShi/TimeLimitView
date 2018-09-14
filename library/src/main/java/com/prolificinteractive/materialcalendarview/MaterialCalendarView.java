@@ -438,13 +438,23 @@ public class MaterialCalendarView extends ViewGroup {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onLocationEvent(LocationEvent event) {
-        Log.i(TAG, "onLocationEvent: " + event.toString());
 
+        Log.i(TAG, "onLocationEvent: ");
         if (event.isStart()) {//开始
             ((TextView) mHintView.findViewById(R.id.tvTitle)).setText("选择结束日期");
         } else if (event.isEnd()) {
-            final int day = (int) ((getSelectedDates().get(getSelectedDates().size() - 1).getCalendar().getTimeInMillis() -
-                    getSelectedDates().get(0).getCalendar().getTimeInMillis()) / 1000 / 60 / 60 / 24);
+            if (event.isTheSameDay()) {
+                ((TextView) mHintView.findViewById(R.id.tvTitle)).setText(1 + "天");
+                return;
+            }
+            Calendar firstCalendar = getSelectedDates().get(0).getCalendar();
+            firstCalendar.set(Calendar.HOUR, 0);
+
+            Calendar lastCalendar = getSelectedDate().getCalendar();
+            lastCalendar.set(Calendar.HOUR, 12);
+
+            final int day = (int) ((lastCalendar.getTimeInMillis() -
+                    firstCalendar.getTimeInMillis()) / 1000 / 60 / 60 / 24);
             ((TextView) mHintView.findViewById(R.id.tvTitle)).setText(day + "天");
         }
 
@@ -1498,7 +1508,9 @@ public class MaterialCalendarView extends ViewGroup {
      * @param firstDay first day enclosing a range
      * @param lastDay  last day enclosing a range
      */
+
     protected void dispatchOnRangeSelected(final CalendarDay firstDay, final CalendarDay lastDay) {
+        mHintView.animate().alpha(getSelectedDates().size() > 0 && selectionMode == SELECTION_MODE_RANGE ? 1 : 0);
         final OnRangeSelectedListener listener = rangeListener;
         final List<CalendarDay> days = new ArrayList<>();
 
@@ -1515,6 +1527,10 @@ public class MaterialCalendarView extends ViewGroup {
             counter.add(Calendar.DATE, 1);
         }
 
+
+        for (CalendarDay day : days) {
+            Log.i(TAG, "dispatchOnRangeSelected: " + day.toString());
+        }
         if (listener != null) {
             listener.onRangeSelected(MaterialCalendarView.this, days);
         }
@@ -1538,7 +1554,7 @@ public class MaterialCalendarView extends ViewGroup {
      * @param date        date of the day that was clicked
      * @param nowSelected true if the date is now selected, false otherwise
      */
-    protected void onDateClicked(@NonNull CalendarDay date, boolean nowSelected, final DayView dayView) {
+    public void onDateClicked(@NonNull CalendarDay date, boolean nowSelected) {
         switch (selectionMode) {
             case SELECTION_MODE_MULTIPLE: {
                 adapter.setDateSelected(date, nowSelected);
@@ -1561,8 +1577,8 @@ public class MaterialCalendarView extends ViewGroup {
 
                     adapter.setDateSelected(date, nowSelected);
                     dispatchOnDateSelected(date, nowSelected);
-                } else if (currentSelection.size() == 1) {
-                    // Selecting the second date of a range
+                } else if (currentSelection.size() == 1 && !currentSelection.get(0).isTheSameDay()) {//第二次进入 清除状态
+                    Log.i(TAG, "onDateClicked: "+date.toString());
                     final CalendarDay firstDaySelected = currentSelection.get(0);
                     if (firstDaySelected.isAfter(date)) {
                         // Selecting a range, dispatching...
@@ -1570,25 +1586,26 @@ public class MaterialCalendarView extends ViewGroup {
                         return;
                     }
 
-
-                    if (nowSelected) {
-                        date.setStrat(false);
-                        date.setEnd(true);
-                    } else {
-                        date.setStrat(false);
-                        date.setEnd(false);
+                    //判断两个日期 是否相同
+                    if (firstDaySelected.equals(date)) {//相同的日期
+                        firstDaySelected.setStrat(false);
+                        firstDaySelected.setEnd(true);
+                        firstDaySelected.setTheSameDay(true);
+                        adapter.setDateSelected(firstDaySelected, true);
+                    } else {//不同日期
+                        if (nowSelected) {
+                            date.setStrat(false);
+                            date.setEnd(true);
+                        } else {
+                            date.setStrat(false);
+                            date.setEnd(false);
+                        }
+                        firstDaySelected.setEndChecked(nowSelected);
+                        adapter.setDateSelected(firstDaySelected, nowSelected);
+                        adapter.setDateSelected(date, nowSelected);
                     }
-
-                    firstDaySelected.setEndChecked(nowSelected);
-                    adapter.setDateSelected(firstDaySelected, nowSelected);
-                    adapter.setDateSelected(date, nowSelected);
-                    if (firstDaySelected.equals(date)) {
-                        // Right now, we are not supporting a range of one day, so we are removing the day instead.
-                        dispatchOnDateSelected(date, nowSelected);
-                    } else {
-                        // Selecting a range, dispatching in reverse order...
-                        dispatchOnRangeSelected(firstDaySelected, date);
-                    }
+                    // Selecting the second date of a range
+                    dispatchOnRangeSelected(firstDaySelected, date);
                 } else {
                     // Clearing selection and making a selection of the new date.
                     adapter.clearSelections();
@@ -1605,7 +1622,6 @@ public class MaterialCalendarView extends ViewGroup {
                     dispatchOnDateSelected(date, nowSelected);
                 }
 
-                Log.i(TAG, "onDateClicked: ");
 //                if (date.isStrat() || date.isEnd()) {//开始
 //                    final int locations[] = new int[2];
 //                    locations[0] = (int) dayView.getX();
@@ -1664,7 +1680,7 @@ public class MaterialCalendarView extends ViewGroup {
                 // goToPrevious();
             }
         }
-        onDateClicked(dayView.getDate(), !dayView.isChecked(), dayView);
+        onDateClicked(dayView.getDate(), !dayView.isChecked());
 
     }
 

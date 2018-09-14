@@ -120,6 +120,11 @@ class DayView extends View {
      * 已经选择了结束时间
      */
     private boolean mIsEndChecked = false;
+    /**
+     * 选择了 同一天
+     */
+    private boolean mIsTheSameDay = false;
+
 
 
     @ShowOtherDates
@@ -127,6 +132,7 @@ class DayView extends View {
 
     @MaterialCalendarView.SelectionMode
     private int selectionMode = 0;
+
 
 
     public DayView(Context context, CalendarDay day) {
@@ -228,6 +234,7 @@ class DayView extends View {
         super.invalidate();
         mIsStrat = date.isStrat();
         mIsEnd = date.isEnd();
+        mIsTheSameDay = date.isTheSameDay();
 
 
         if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {
@@ -237,7 +244,7 @@ class DayView extends View {
             final int locations[] = new int[2];
             locations[0] = (int) getX();
             locations[1] = (int) getY();
-            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(), mIsLeft, mIsRight, getWidth()));
+            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(), mIsLeft, mIsRight,mIsTheSameDay, getWidth()));
         }
     }
 
@@ -285,7 +292,7 @@ class DayView extends View {
 
 
         if (mIsChecked) {
-            if (selectionMode == MaterialCalendarView.SELECTION_MODE_RANGE) {//范围选中
+            if (selectionMode == MaterialCalendarView.SELECTION_MODE_RANGE&&!mIsTheSameDay) {//范围选中
 
                 //一共有以下的状态
                 //1.左边 ,开始,,没有选中结束
@@ -324,7 +331,7 @@ class DayView extends View {
                         canvas.drawRect(mBackgroundRect, mBackgroundPaint);
                     }
                 }
-            } else if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {//单选
+            } else if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE||mIsTheSameDay) {//单选
                 canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
             }
         }

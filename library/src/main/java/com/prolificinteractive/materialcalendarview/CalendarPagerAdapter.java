@@ -281,8 +281,9 @@ abstract class CalendarPagerAdapter<V extends CalendarPagerView> extends PagerAd
         if (selected) {
             if (!selectedDates.contains(day)) {
                 selectedDates.add(day);
-                invalidateSelectedDates();
+
             }
+            invalidateSelectedDates();
         } else {
             if (selectedDates.contains(day)) {
                 selectedDates.remove(day);
