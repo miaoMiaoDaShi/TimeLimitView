@@ -214,10 +214,10 @@ public final class CalendarDay implements Parcelable {
      */
     @NonNull
     public Calendar getCalendar() {
-        if (_calendar == null) {
+        //if (_calendar == null) {
             _calendar = CalendarUtils.getInstance();
             copyTo(_calendar);
-        }
+        //}
         return _calendar;
     }
 
@@ -307,7 +307,7 @@ public final class CalendarDay implements Parcelable {
 
     @Override
     public String toString() {
-        return "CalendarDay{" + year + "-" + month + "-" + day + "}";
+        return "CalendarDay{" + year + "-" + month + "-" + day + "-"+isStrat()+ "-"+isEnd()+"}";
     }
 
     /*

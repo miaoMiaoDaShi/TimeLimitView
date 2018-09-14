@@ -44,6 +44,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -187,6 +188,12 @@ public class MaterialCalendarView extends ViewGroup {
     private CalendarDay currentMonth;
     private LinearLayout topbar;
     private CalendarMode calendarMode;
+    /**
+     * 天数
+     */
+    private int mDay;
+
+
     /**
      * Used for the dynamic calendar height.
      */
@@ -442,35 +449,44 @@ public class MaterialCalendarView extends ViewGroup {
         Log.i(TAG, "onLocationEvent: ");
         if (event.isStart()) {//开始
             ((TextView) mHintView.findViewById(R.id.tvTitle)).setText("选择结束日期");
+            mHintView.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (event.isLeft()) {
+                        mHintView.setTranslationX(event.getLocation()[0]);
+                    } else if (event.isRight()) {
+                        mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()));
+                    } else {
+                        Log.i(TAG, "run: "+Math.abs(mHintView.getWidth() - event.getDayViewWidth()));
+                        mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
+                    }
+
+                }
+            });
         } else if (event.isEnd()) {
             if (event.isTheSameDay()) {
                 ((TextView) mHintView.findViewById(R.id.tvTitle)).setText(1 + "天");
-                return;
+            } else {
+//                Calendar firstCalendar = getSelectedDates().get(0).getCalendar();
+//
+//                Calendar lastCalendar = getSelectedDate().getCalendar();
+//
+//                final int day = (int) ((lastCalendar.getTimeInMillis() -
+//                        firstCalendar.getTimeInMillis()) / 1000 / 60 / 60 / 24);
+                ((TextView) mHintView.findViewById(R.id.tvTitle)).setText(mDay + "天");
             }
-            Calendar firstCalendar = getSelectedDates().get(0).getCalendar();
-            firstCalendar.set(Calendar.HOUR, 0);
 
-            Calendar lastCalendar = getSelectedDate().getCalendar();
-            lastCalendar.set(Calendar.HOUR, 12);
+            mHintView.post(new Runnable() {
+                @Override
+                public void run() {
+                    mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
 
-            final int day = (int) ((lastCalendar.getTimeInMillis() -
-                    firstCalendar.getTimeInMillis()) / 1000 / 60 / 60 / 24);
-            ((TextView) mHintView.findViewById(R.id.tvTitle)).setText(day + "天");
+                }
+            });
+
         }
 
-        mHintView.post(new Runnable() {
-            @Override
-            public void run() {
-                if (event.isLeft()) {
-                    mHintView.setTranslationX(event.getLocation()[0]);
-                } else if (event.isRight()) {
-                    mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()));
-                } else {
-                    mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()) / 2);
-                }
 
-            }
-        });
 
 
         mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight() / 2);
@@ -626,6 +642,10 @@ public class MaterialCalendarView extends ViewGroup {
         this.tileWidth = size;
         this.tileHeight = size;
         requestLayout();
+    }
+
+    public void setDay(int day) {
+        mDay = day;
     }
 
     /**
@@ -1510,19 +1530,22 @@ public class MaterialCalendarView extends ViewGroup {
      */
 
     protected void dispatchOnRangeSelected(final CalendarDay firstDay, final CalendarDay lastDay) {
+        Log.i(TAG, "开始日期/结束日期 : "+firstDay.toString()+"/"+lastDay.toString()+"结束毫秒: "+new SimpleDateFormat("yyyy-MM-dd").format(lastDay.getDate()));
         mHintView.animate().alpha(getSelectedDates().size() > 0 && selectionMode == SELECTION_MODE_RANGE ? 1 : 0);
         final OnRangeSelectedListener listener = rangeListener;
         final List<CalendarDay> days = new ArrayList<>();
 
-        final Calendar counter = Calendar.getInstance();
-        counter.setTime(firstDay.getDate());  //  start from the first day and increment
+        final Calendar counter = firstDay.getCalendar();
+       // counter.setTime(firstDay.getDate());  //  start from the first day and increment
 
-        final Calendar end = Calendar.getInstance();
-        end.setTime(lastDay.getDate());  //  for comparison
+        final Calendar end =lastDay.getCalendar();
+       // end.setTime(lastDay.getDate());  //  for comparison
+        Log.i(TAG, "结束日期 : "+CalendarDay.from(end).toString()+"毫秒: "+new SimpleDateFormat("yyyy-MM-dd").format(lastDay.getDate()));
 
         while (counter.before(end) || counter.equals(end)) {
             final CalendarDay current = CalendarDay.from(counter);
             adapter.setDateSelected(current, true);
+            Log.i(TAG, "正在添加中: "+current.toString()+"结束时间: "+CalendarDay.from(end).toString());
             days.add(current);
             counter.add(Calendar.DATE, 1);
         }
@@ -1566,20 +1589,12 @@ public class MaterialCalendarView extends ViewGroup {
 
                 if (currentSelection.size() == 0) {
                     // Selecting the first date of a range
-                    if (nowSelected) {
-                        date.setStrat(true);
-                        date.setEnd(false);
-                    } else {
-                        date.setStrat(false);
-                        date.setEnd(false);
-                    }
-
-
-                    adapter.setDateSelected(date, nowSelected);
-                    dispatchOnDateSelected(date, nowSelected);
-                } else if (currentSelection.size() == 1 && !currentSelection.get(0).isTheSameDay()) {//第二次进入 清除状态
-                    Log.i(TAG, "onDateClicked: "+date.toString());
+                    date.setStrat(true);
+                    adapter.setDateSelected(date, true);
+                    dispatchOnDateSelected(date, true);
+                } else if (currentSelection.size() == 1) {
                     final CalendarDay firstDaySelected = currentSelection.get(0);
+
                     if (firstDaySelected.isAfter(date)) {
                         // Selecting a range, dispatching...
                         Toast.makeText(getContext(), "请选择开始时间以前的日期", Toast.LENGTH_SHORT).show();
@@ -1587,39 +1602,37 @@ public class MaterialCalendarView extends ViewGroup {
                     }
 
                     //判断两个日期 是否相同
-                    if (firstDaySelected.equals(date)) {//相同的日期
-                        firstDaySelected.setStrat(false);
-                        firstDaySelected.setEnd(true);
-                        firstDaySelected.setTheSameDay(true);
+                    if (firstDaySelected.equals(date)) {//相同的日期  反正里面也就这一个
+                        if (firstDaySelected.isTheSameDay()) {//是否是第二次选中过
+                            adapter.clearSelections();
+                            firstDaySelected.setStrat(true);
+
+                        }else {
+                            firstDaySelected.setStrat(false);
+                            firstDaySelected.setEnd(true);
+                            firstDaySelected.setTheSameDay(true);
+                        }
+
                         adapter.setDateSelected(firstDaySelected, true);
                     } else {//不同日期
-                        if (nowSelected) {
-                            date.setStrat(false);
-                            date.setEnd(true);
-                        } else {
-                            date.setStrat(false);
-                            date.setEnd(false);
-                        }
-                        firstDaySelected.setEndChecked(nowSelected);
-                        adapter.setDateSelected(firstDaySelected, nowSelected);
-                        adapter.setDateSelected(date, nowSelected);
+                        Log.i(TAG, "选择不同的日期: "+date.toString());
+                        date.setEnd(true);
+                        firstDaySelected.setEndChecked(true);
+                        adapter.setDateSelected(firstDaySelected, true);
+                        adapter.setDateSelected(date, true);
                     }
                     // Selecting the second date of a range
                     dispatchOnRangeSelected(firstDaySelected, date);
                 } else {
                     // Clearing selection and making a selection of the new date.
                     adapter.clearSelections();
-
-
-                    if (nowSelected) {
-                        date.setStrat(true);
-                        date.setEnd(false);
-                    } else {
-                        date.setStrat(false);
-                        date.setEnd(false);
+                    Log.i(TAG, "清理  从新选中: "+date.toString());
+                    for (CalendarDay calendarDay : getSelectedDates()) {
+                        Log.i(TAG, "目前的集合里: "+calendarDay.toString());
                     }
-                    adapter.setDateSelected(date, nowSelected);
-                    dispatchOnDateSelected(date, nowSelected);
+                    date.setStrat(true);
+                    adapter.setDateSelected(date, true);
+                    dispatchOnDateSelected(date, true);
                 }
 
 //                if (date.isStrat() || date.isEnd()) {//开始
@@ -1680,7 +1693,12 @@ public class MaterialCalendarView extends ViewGroup {
                 // goToPrevious();
             }
         }
-        onDateClicked(dayView.getDate(), !dayView.isChecked());
+
+        //重置状态
+        final CalendarDay calendarDay = dayView.getDate();
+        calendarDay.setStrat(false);
+        calendarDay.setEnd(false);
+        onDateClicked(calendarDay, !dayView.isChecked());
 
     }
 

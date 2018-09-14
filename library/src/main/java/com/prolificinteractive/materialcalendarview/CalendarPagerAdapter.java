@@ -272,6 +272,7 @@ abstract class CalendarPagerAdapter<V extends CalendarPagerView> extends PagerAd
                 dayView.getDate().setStrat(false);
                 dayView.getDate().setEnd(false);
                 dayView.getDate().setEndChecked(false);
+                dayView.getDate().setTheSameDay(false);
             }
         }
         invalidateSelectedDates();

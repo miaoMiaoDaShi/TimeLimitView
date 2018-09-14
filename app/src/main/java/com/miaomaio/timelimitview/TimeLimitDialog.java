@@ -5,19 +5,23 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,6 +31,8 @@ import java.util.Objects;
  * Description :
  */
 public class TimeLimitDialog extends DialogFragment {
+
+    private static final String TAG = "TimeLimitDialog";
 
     public static TimeLimitDialog newInstance() {
 
@@ -74,30 +80,41 @@ public class TimeLimitDialog extends DialogFragment {
             }
         });
         try {
-            final long startTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-14").getTime();
-            final long endTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-18").getTime();
-
+            final long startTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-5").getTime();
+            final long endTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-15").getTime();
 
 
             CalendarDay startCalendarDay = CalendarDay.from(startTime);
             CalendarDay endCalendarDay = CalendarDay.from(endTime);
 
             materialCalendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
+            materialCalendarView.setDay(11);
             materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+
 
             materialCalendarView.post(new Runnable() {
                 @Override
                 public void run() {
-                    materialCalendarView.onDateClicked(startCalendarDay,true);
-                    materialCalendarView.onDateClicked(endCalendarDay,true);
+                    materialCalendarView.onDateClicked(startCalendarDay, true);
+                    materialCalendarView.onDateClicked(endCalendarDay, true);
+
+                    materialCalendarView.setOnRangeSelectedListener(new OnRangeSelectedListener() {
+                        @Override
+                        public void onRangeSelected(@NonNull MaterialCalendarView widget, @NonNull List<CalendarDay> dates) {
+                            CalendarDay calendarDay1 = dates.get(0);
+                            CalendarDay calendarDay2 = dates.get(dates.size() - 1);
+                            int day = (int) ((calendarDay2.getCalendar().getTimeInMillis()-calendarDay1.getCalendar().getTimeInMillis())/1000/24/3600);
+                            Toast.makeText(getContext(), String.format("开始%s 结束%s,%d天",calendarDay1,calendarDay2,day+1), Toast.LENGTH_LONG).show();
+                            dismiss();
+                        }
+                    });
                 }
             });
+
 
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
-
 
 
     }

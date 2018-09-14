@@ -15,6 +15,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,6 +36,8 @@ import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.
  */
 @SuppressLint("ViewConstructor")
 class DayView extends View {
+
+    private static final String TAG = "DayView";
 
     private CalendarDay date;
     private int selectionColor = Color.BLACK;
@@ -232,6 +235,7 @@ class DayView extends View {
     @Override
     public void invalidate() {
         super.invalidate();
+        Log.i(TAG, "invalidate: ");
         mIsStrat = date.isStrat();
         mIsEnd = date.isEnd();
         mIsTheSameDay = date.isTheSameDay();
@@ -257,9 +261,7 @@ class DayView extends View {
     @Override
     public void postInvalidate() {
         super.postInvalidate();
-        mIsStrat = date.isStrat();
-        mIsEnd = date.isEnd();
-
+        Log.i(TAG, "postInvalidate: ");
     }
 
     @Override
