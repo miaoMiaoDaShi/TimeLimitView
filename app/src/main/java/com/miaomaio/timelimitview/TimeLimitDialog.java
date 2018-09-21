@@ -81,7 +81,7 @@ public class TimeLimitDialog extends DialogFragment {
         });
         try {
             final long startTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-5").getTime();
-            final long endTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-5").getTime();
+            final long endTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-28").getTime();
 
 
             CalendarDay startCalendarDay = CalendarDay.from(startTime);

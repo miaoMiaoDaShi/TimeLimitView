@@ -458,7 +458,7 @@ public class MaterialCalendarView extends ViewGroup {
                         mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()));
                     } else {
                         Log.i(TAG, "run: "+Math.abs(mHintView.getWidth() - event.getDayViewWidth()));
-                        mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
+                        mHintView.setTranslationX(event.getLocation()[0] + (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
                     }
 
                 }
@@ -479,7 +479,7 @@ public class MaterialCalendarView extends ViewGroup {
             mHintView.post(new Runnable() {
                 @Override
                 public void run() {
-                    mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
+                    mHintView.setTranslationX(event.getLocation()[0] + (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
 
                 }
             });
@@ -1616,6 +1616,17 @@ public class MaterialCalendarView extends ViewGroup {
                         adapter.setDateSelected(firstDaySelected, true);
                     } else {//不同日期
                         Log.i(TAG, "选择不同的日期: "+date.toString());
+                        if (firstDaySelected.isTheSameDay()) {
+                            adapter.clearSelections();
+                            Log.i(TAG, "清理  从新选中: "+date.toString());
+                            for (CalendarDay calendarDay : getSelectedDates()) {
+                                Log.i(TAG, "目前的集合里: "+calendarDay.toString());
+                            }
+                            date.setStrat(true);
+                            adapter.setDateSelected(date, true);
+                            dispatchOnDateSelected(date, true);
+                            return;
+                        }
                         date.setEnd(true);
                         firstDaySelected.setEndChecked(true);
                         adapter.setDateSelected(firstDaySelected, true);
