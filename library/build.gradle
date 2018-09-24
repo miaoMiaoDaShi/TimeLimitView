@@ -6,7 +6,7 @@ publish {
     groupId = 'com.miaomiao'         //compile引用时的第1部分groupId
     artifactId = 'time-limit-view'     //compile引用时的第2部分项目名
     repoName = 'time-limit-view'
-    publishVersion = '1.0.2'    //compile引用时的第3部分版本号
+    publishVersion = '1.0.3'    //compile引用时的第3部分版本号
     desc = 'One time period selection control'
     website = 'https://github.com/miaoMiaoDaShi/TimeLimitView'
 
