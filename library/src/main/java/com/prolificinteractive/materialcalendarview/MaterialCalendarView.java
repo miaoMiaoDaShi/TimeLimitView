@@ -458,7 +458,7 @@ public class MaterialCalendarView extends ViewGroup {
                         mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()));
                     } else {
                         Log.i(TAG, "run: "+Math.abs(mHintView.getWidth() - event.getDayViewWidth()));
-                        mHintView.setTranslationX(event.getLocation()[0] + (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
+                        mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
                     }
 
                 }
