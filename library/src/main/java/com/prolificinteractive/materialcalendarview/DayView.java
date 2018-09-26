@@ -242,7 +242,7 @@ class DayView extends View {
         mIsTheSameDay = date.isTheSameDay();
 
 
-        if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {
+        if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE||!isInMonth) {
             return;
         }
         if (date.isStrat() || date.isEnd()) {//开始
