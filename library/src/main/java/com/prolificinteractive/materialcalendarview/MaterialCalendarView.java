@@ -33,7 +33,6 @@ import android.widget.Toast;
 
 import com.prolificinteractive.materialcalendarview.format.ArrayWeekDayFormatter;
 import com.prolificinteractive.materialcalendarview.format.DateFormatTitleFormatter;
-import com.prolificinteractive.materialcalendarview.format.DayFormatter;
 import com.prolificinteractive.materialcalendarview.format.MonthArrayTitleFormatter;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter;
@@ -76,6 +75,10 @@ import java.util.List;
 public class MaterialCalendarView extends ViewGroup {
 
     public static final int INVALID_TILE_DIMENSION = -10;
+    /**
+     * 完整的当前时间
+     */
+    private CalendarDay mCurrentAllDate;
 
     /**
      * {@linkplain IntDef} annotation for selection mode.
@@ -188,6 +191,16 @@ public class MaterialCalendarView extends ViewGroup {
     private CalendarDay currentMonth;
     private LinearLayout topbar;
     private CalendarMode calendarMode;
+
+
+    /**
+     * 开始选中的时间
+     */
+    private CalendarDay mStartCalendarDay;
+    /**
+     * 结束选中的时间
+     */
+    private CalendarDay mEndCalendarDay;
     /**
      * 天数
      */
@@ -204,6 +217,15 @@ public class MaterialCalendarView extends ViewGroup {
     private final OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
+            pageChangeListener.onPageScrollStateChanged(ViewPager.SCROLL_STATE_DRAGGING);
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    pageChangeListener.onPageScrollStateChanged(ViewPager.SCROLL_STATE_IDLE);
+                }
+            }, 500);
+
+
             if (v == buttonFuture) {
                 pager.setCurrentItem(pager.getCurrentItem() + 1, true);
             } else if (v == buttonPast) {
@@ -228,17 +250,14 @@ public class MaterialCalendarView extends ViewGroup {
         public void onPageScrollStateChanged(int state) {
             switch (state) {
                 case ViewPager.SCROLL_STATE_IDLE:
-                    Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_IDLE");
                     if (getSelectedDates().size() > 0 && getSelectedDates().get(getSelectedDates().size() - 1).getMonth() == currentMonth.getMonth()) {
                         mHintView.animate().alpha(1);
                     }
                     break;
                 case ViewPager.SCROLL_STATE_DRAGGING:
-                    Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_DRAGGING");
                     mHintView.animate().alpha(0);
                     break;
                 case ViewPager.SCROLL_STATE_SETTLING:
-                    Log.i(TAG, "onPageScrollStateChanged: SCROLL_STATE_SETTLING");
 
                     break;
 
@@ -281,6 +300,7 @@ public class MaterialCalendarView extends ViewGroup {
     public MaterialCalendarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        mCurrentAllDate = CalendarDay.from(System.currentTimeMillis());
         EventBus.getDefault().register(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -306,7 +326,7 @@ public class MaterialCalendarView extends ViewGroup {
         titleChanger = new TitleChanger(title);
         titleChanger.setTitleFormatter(DEFAULT_TITLE_FORMATTER);
 
-        pager.setOnPageChangeListener(pageChangeListener);
+        pager.addOnPageChangeListener(pageChangeListener);
         pager.setPageTransformer(false, new ViewPager.PageTransformer() {
             @Override
             public void transformPage(View page, float position) {
@@ -446,7 +466,6 @@ public class MaterialCalendarView extends ViewGroup {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onLocationEvent(LocationEvent event) {
 
-        Log.i(TAG, "onLocationEvent: ");
         if (event.isStart()) {//开始
             ((TextView) mHintView.findViewById(R.id.tvTitle)).setText("选择结束日期");
             mHintView.post(new Runnable() {
@@ -457,7 +476,6 @@ public class MaterialCalendarView extends ViewGroup {
                     } else if (event.isRight()) {
                         mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()));
                     } else {
-                        Log.i(TAG, "run: "+Math.abs(mHintView.getWidth() - event.getDayViewWidth()));
                         mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
                     }
 
@@ -487,8 +505,6 @@ public class MaterialCalendarView extends ViewGroup {
         }
 
 
-
-
         mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight() / 2);
     }
 
@@ -513,7 +529,6 @@ public class MaterialCalendarView extends ViewGroup {
         topbar.addView(new View(getContext()), new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 0.3f));
 
         pager.setId(R.id.mcv_pager);
-        pager.setOffscreenPageLimit(1);
         int tileHeight = showWeekDays ? calendarMode.visibleWeeksCount + DAY_NAMES_ROW : calendarMode.visibleWeeksCount;
 
 
@@ -968,7 +983,7 @@ public class MaterialCalendarView extends ViewGroup {
     /**
      * @param calendar a Calendar set to a day to focus the calendar on. Null will do nothing
      */
-    public void setCurrentDate(@Nullable Calendar calendar) {
+    public void setCurrentAllDate(@Nullable Calendar calendar) {
         setCurrentDate(CalendarDay.from(calendar));
     }
 
@@ -982,7 +997,7 @@ public class MaterialCalendarView extends ViewGroup {
     /**
      * @return The current month shown, will be set to first day of the month
      */
-    public CalendarDay getCurrentDate() {
+    public CalendarDay getCurrentAllDate() {
         return adapter.getItem(pager.getCurrentItem());
     }
 
@@ -1530,32 +1545,28 @@ public class MaterialCalendarView extends ViewGroup {
      */
 
     protected void dispatchOnRangeSelected(final CalendarDay firstDay, final CalendarDay lastDay) {
-        Log.i(TAG, "开始日期/结束日期 : "+firstDay.toString()+"/"+lastDay.toString()+"结束毫秒: "+new SimpleDateFormat("yyyy-MM-dd").format(lastDay.getDate()));
         mHintView.animate().alpha(getSelectedDates().size() > 0 && selectionMode == SELECTION_MODE_RANGE ? 1 : 0);
         final OnRangeSelectedListener listener = rangeListener;
         final List<CalendarDay> days = new ArrayList<>();
 
         final Calendar counter = firstDay.getCalendar();
-       // counter.setTime(firstDay.getDate());  //  start from the first day and increment
+        // counter.setTime(firstDay.getDate());  //  start from the first day and increment
 
-        final Calendar end =lastDay.getCalendar();
-       // end.setTime(lastDay.getDate());  //  for comparison
-        Log.i(TAG, "结束日期 : "+CalendarDay.from(end).toString()+"毫秒: "+new SimpleDateFormat("yyyy-MM-dd").format(lastDay.getDate()));
+        final Calendar end = lastDay.getCalendar();
+        // end.setTime(lastDay.getDate());  //  for comparison
 
         while (counter.before(end) || counter.equals(end)) {
             final CalendarDay current = CalendarDay.from(counter);
             adapter.setDateSelected(current, true);
-            Log.i(TAG, "正在添加中: "+current.toString()+"结束时间: "+CalendarDay.from(end).toString());
             days.add(current);
             counter.add(Calendar.DATE, 1);
         }
 
-
-        for (CalendarDay day : days) {
-            Log.i(TAG, "dispatchOnRangeSelected: " + day.toString());
-        }
+        final int day = (int) ((mEndCalendarDay.getTimeInMillis() -
+                mStartCalendarDay.getTimeInMillis()) / 1000 / 60 / 60 / 24)+1;
+        mDay = day;
         if (listener != null) {
-            listener.onRangeSelected(MaterialCalendarView.this, days);
+            listener.onRangeSelected(MaterialCalendarView.this, mStartCalendarDay, mEndCalendarDay, day);
         }
     }
 
@@ -1578,6 +1589,7 @@ public class MaterialCalendarView extends ViewGroup {
      * @param nowSelected true if the date is now selected, false otherwise
      */
     public void onDateClicked(@NonNull CalendarDay date, boolean nowSelected) {
+
         switch (selectionMode) {
             case SELECTION_MODE_MULTIPLE: {
                 adapter.setDateSelected(date, nowSelected);
@@ -1590,14 +1602,21 @@ public class MaterialCalendarView extends ViewGroup {
                 if (currentSelection.size() == 0) {
                     // Selecting the first date of a range
                     date.setStrat(true);
+
+                    mStartCalendarDay = date;
                     adapter.setDateSelected(date, true);
                     dispatchOnDateSelected(date, true);
                 } else if (currentSelection.size() == 1) {
                     final CalendarDay firstDaySelected = currentSelection.get(0);
 
-                    if (firstDaySelected.isAfter(date)) {
+                    if (firstDaySelected.isAfter(date)) {//选择开始时间以前的日期
                         // Selecting a range, dispatching...
-                        Toast.makeText(getContext(), "请选择开始时间以前的日期", Toast.LENGTH_SHORT).show();
+                        adapter.clearSelections();
+
+                        date.setStrat(true);
+                        adapter.setDateSelected(date, true);
+                        dispatchOnDateSelected(date, true);
+                        mStartCalendarDay = date;
                         return;
                     }
 
@@ -1607,7 +1626,7 @@ public class MaterialCalendarView extends ViewGroup {
                             adapter.clearSelections();
                             firstDaySelected.setStrat(true);
 
-                        }else {
+                        } else {
                             firstDaySelected.setStrat(false);
                             firstDaySelected.setEnd(true);
                             firstDaySelected.setTheSameDay(true);
@@ -1615,13 +1634,9 @@ public class MaterialCalendarView extends ViewGroup {
 
                         adapter.setDateSelected(firstDaySelected, true);
                     } else {//不同日期
-                        Log.i(TAG, "选择不同的日期: "+date.toString());
                         if (firstDaySelected.isTheSameDay()) {
                             adapter.clearSelections();
-                            Log.i(TAG, "清理  从新选中: "+date.toString());
-                            for (CalendarDay calendarDay : getSelectedDates()) {
-                                Log.i(TAG, "目前的集合里: "+calendarDay.toString());
-                            }
+
                             date.setStrat(true);
                             adapter.setDateSelected(date, true);
                             dispatchOnDateSelected(date, true);
@@ -1633,15 +1648,15 @@ public class MaterialCalendarView extends ViewGroup {
                         adapter.setDateSelected(date, true);
                     }
                     // Selecting the second date of a range
+                    mStartCalendarDay = firstDaySelected;
+                    mEndCalendarDay = date;
                     dispatchOnRangeSelected(firstDaySelected, date);
                 } else {
                     // Clearing selection and making a selection of the new date.
                     adapter.clearSelections();
-                    Log.i(TAG, "清理  从新选中: "+date.toString());
-                    for (CalendarDay calendarDay : getSelectedDates()) {
-                        Log.i(TAG, "目前的集合里: "+calendarDay.toString());
-                    }
+
                     date.setStrat(true);
+                    mStartCalendarDay = date;
                     adapter.setDateSelected(date, true);
                     dispatchOnDateSelected(date, true);
                 }
@@ -1687,8 +1702,19 @@ public class MaterialCalendarView extends ViewGroup {
      * @param dayView
      */
     protected void onDateClicked(final DayView dayView) {
-        final CalendarDay currentDate = getCurrentDate();
+
+
+        final CalendarDay currentDate = getCurrentAllDate();
         final CalendarDay selectedDate = dayView.getDate();
+
+
+        //当天以前的时间不能选中
+        if (selectedDate.isBefore(mCurrentAllDate)) {
+            Toast.makeText(getContext(), "请选择当天之前的时间", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+
         final int currentMonth = currentDate.getMonth();
         final int selectedMonth = selectedDate.getMonth();
         if (currentMonth != selectedMonth) {

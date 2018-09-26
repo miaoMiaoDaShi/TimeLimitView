@@ -129,13 +129,11 @@ class DayView extends View {
     private boolean mIsTheSameDay = false;
 
 
-
     @ShowOtherDates
     private int showOtherDates = MaterialCalendarView.SHOW_DEFAULTS;
 
     @MaterialCalendarView.SelectionMode
     private int selectionMode = 0;
-
 
 
     public DayView(Context context, CalendarDay day) {
@@ -235,7 +233,10 @@ class DayView extends View {
     @Override
     public void invalidate() {
         super.invalidate();
-        Log.i(TAG, "invalidate: ");
+
+    }
+
+    private void sendMsg() {
         mIsStrat = date.isStrat();
         mIsEnd = date.isEnd();
         mIsTheSameDay = date.isTheSameDay();
@@ -248,20 +249,19 @@ class DayView extends View {
             final int locations[] = new int[2];
             locations[0] = (int) getX();
             locations[1] = (int) getY();
-            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(), mIsLeft, mIsRight,mIsTheSameDay, getWidth()));
+            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(), mIsLeft, mIsRight, mIsTheSameDay, getWidth()));
         }
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
     }
 
     @Override
     public void postInvalidate() {
         super.postInvalidate();
-        Log.i(TAG, "postInvalidate: ");
+
     }
 
     @Override
@@ -273,7 +273,7 @@ class DayView extends View {
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
-
+        sendMsg();
 
         mIsEndChecked = date.isEndChecked();
 
@@ -294,7 +294,7 @@ class DayView extends View {
 
 
         if (mIsChecked) {
-            if (selectionMode == MaterialCalendarView.SELECTION_MODE_RANGE&&!mIsTheSameDay) {//范围选中
+            if (selectionMode == MaterialCalendarView.SELECTION_MODE_RANGE && !mIsTheSameDay) {//范围选中
 
                 //一共有以下的状态
                 //1.左边 ,开始,,没有选中结束
@@ -333,7 +333,7 @@ class DayView extends View {
                         canvas.drawRect(mBackgroundRect, mBackgroundPaint);
                     }
                 }
-            } else if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE||mIsTheSameDay) {//单选
+            } else if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE || mIsTheSameDay) {//单选
                 canvas.drawCircle(mCircleX, mCircleY, mCircleRadius, mCirclePointPaint);
             }
         }

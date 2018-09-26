@@ -5,11 +5,18 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 /**
  * An imputable representation of a day on a calendar
+ * <p>
+ * <p>
+ * <p>
+ * 我发现这里面的 Calendar和 date  会出现与  int year, int month, int day 不对应的情况,
+ * 所以  暂时  只向调用方  提供  毫秒  由调用端  自行进行 转化
  */
 public final class CalendarDay implements Parcelable {
 
@@ -172,7 +179,7 @@ public final class CalendarDay implements Parcelable {
      *
      * @return the year for this day
      */
-    public int getYear() {
+    int getYear() {
         return year;
     }
 
@@ -181,17 +188,30 @@ public final class CalendarDay implements Parcelable {
      *
      * @return the month of the year as defined by {@linkplain Calendar}
      */
-    public int getMonth() {
+
+    int getMonth() {
         return month;
     }
+
 
     /**
      * Get the day
      *
      * @return the day of the month for this day
      */
-    public int getDay() {
+    int getDay() {
         return day;
+    }
+
+    private SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    public long getTimeInMillis() {
+        try {
+            return mSimpleDateFormat.parse(String.format("%d-%d-%d", year, month + 1, day)).getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     /**
@@ -200,7 +220,7 @@ public final class CalendarDay implements Parcelable {
      * @return a date with this days information
      */
     @NonNull
-    public Date getDate() {
+    Date getDate() {
         if (_date == null) {
             _date = getCalendar().getTime();
         }
@@ -213,10 +233,10 @@ public final class CalendarDay implements Parcelable {
      * @return a new calendar instance with this day information
      */
     @NonNull
-    public Calendar getCalendar() {
+    Calendar getCalendar() {
         //if (_calendar == null) {
-            _calendar = CalendarUtils.getInstance();
-            copyTo(_calendar);
+        _calendar = CalendarUtils.getInstance();
+        copyTo(_calendar);
         //}
         return _calendar;
     }
@@ -307,7 +327,7 @@ public final class CalendarDay implements Parcelable {
 
     @Override
     public String toString() {
-        return "CalendarDay{" + year + "-" + month + "-" + day + "-"+isStrat()+ "-"+isEnd()+"}";
+        return "CalendarDay{" + year + "-" + month + "-" + day + "-" + isStrat() + "-" + isEnd() + "}";
     }
 
     /*

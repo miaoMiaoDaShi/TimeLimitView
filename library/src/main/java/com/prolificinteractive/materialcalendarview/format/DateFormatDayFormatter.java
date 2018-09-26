@@ -6,6 +6,7 @@ import com.prolificinteractive.materialcalendarview.CalendarDay;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -37,6 +38,6 @@ public class DateFormatDayFormatter implements DayFormatter {
     @Override
     @NonNull
     public String format(@NonNull CalendarDay day) {
-        return dateFormat.format(day.getDate());
+        return dateFormat.format(new Date(day.getTimeInMillis()));
     }
 }

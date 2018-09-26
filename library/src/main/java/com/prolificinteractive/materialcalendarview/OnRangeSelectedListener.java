@@ -13,8 +13,10 @@ public interface OnRangeSelectedListener {
      * Called when a user selects a range of days.
      * There is no logic to prevent multiple calls for the same date and state.
      *
-     * @param widget   the view associated with this listener
-     * @param dates     the dates in the range, in ascending order
+     * @param widget           the view associated with this listener
+     * @param startCalendarDay 开始时间
+     * @param endCalendarDay   结束时间
+     * @param day              天数
      */
-    void onRangeSelected(@NonNull MaterialCalendarView widget, @NonNull List<CalendarDay> dates);
+    void onRangeSelected(@NonNull MaterialCalendarView widget, CalendarDay startCalendarDay, CalendarDay endCalendarDay, int day);
 }
