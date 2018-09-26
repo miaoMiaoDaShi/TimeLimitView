@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 
@@ -35,10 +36,12 @@ public class TimeLimitDialog extends DialogFragment {
 
     private static final String TAG = "TimeLimitDialog";
 
-    public static TimeLimitDialog newInstance() {
+    public static TimeLimitDialog newInstance(int selectMode,long startTime,long endTime) {
 
         Bundle args = new Bundle();
-
+        args.putInt("selectMode", selectMode);
+        args.putLong("startTime",startTime);
+        args.putLong("endTime",endTime);
         TimeLimitDialog fragment = new TimeLimitDialog();
         fragment.setArguments(args);
         return fragment;
@@ -81,44 +84,70 @@ public class TimeLimitDialog extends DialogFragment {
             }
         });
         try {
-            final long startTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-25").getTime();
-            final long endTime = new SimpleDateFormat("yyyy-MM-dd").parse("2018-9-26").getTime();
+            final int selectMode = getArguments().getInt("selectMode", MaterialCalendarView.SELECTION_MODE_SINGLE);
+            final long startTime = getArguments().getLong("startTime",0);
+            final long endTime = getArguments().getLong("endTime",0);
 
 
             CalendarDay startCalendarDay = CalendarDay.from(startTime);
             CalendarDay endCalendarDay = CalendarDay.from(endTime);
 
             materialCalendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
-            materialCalendarView.setDay(2);
-            materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+            materialCalendarView.setSelectionMode(selectMode);
 
 
             materialCalendarView.post(new Runnable() {
                 @Override
                 public void run() {
-                    materialCalendarView.onDateClicked(startCalendarDay, true);
-                    materialCalendarView.onDateClicked(endCalendarDay, true);
-                    materialCalendarView.setCurrentDate(endTime);
+                    if (startTime!=0&&endTime!=0&&endTime>=startTime) {
+                        materialCalendarView.onDateClicked(startCalendarDay, true);
+                        materialCalendarView.onDateClicked(endCalendarDay, true);
+                        materialCalendarView.setCurrentDate(endTime);
+                    }
 
-                    materialCalendarView.setOnRangeSelectedListener(new OnRangeSelectedListener() {
-                        @Override
-                        public void onRangeSelected(@NonNull MaterialCalendarView widget, CalendarDay startCalendarDay, CalendarDay endCalendarDay, int day) {
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(getContext(), String.format("开始%s 结束%s,%d天", startCalendarDay, endCalendarDay, day), Toast.LENGTH_LONG).show();
-                                    dismiss();
-                                }
-                            }, 1000);
-                        }
+                    if (selectMode== MaterialCalendarView.SELECTION_MODE_RANGE) {
+                        materialCalendarView.setOnRangeSelectedListener(new OnRangeSelectedListener() {
+                            @Override
+                            public void onRangeSelected(@NonNull MaterialCalendarView widget, CalendarDay startCalendarDay, CalendarDay endCalendarDay, int day) {
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (mOnRangeSelectedListener != null) {
+                                            mOnRangeSelectedListener.onRangeSelected(widget, startCalendarDay, endCalendarDay, day);
+                                        }
+                                        dismiss();
+                                    }
+                                }, 1000);
+                            }
 
 
-                    });
+                        });
+                    } else if(selectMode== MaterialCalendarView.SELECTION_MODE_SINGLE){
+                        materialCalendarView.setOnDateChangedListener(new OnDateSelectedListener() {
+                            @Override
+                            public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (mOnDateSelectedListener != null) {
+                                            mOnDateSelectedListener.onDateSelected(widget, date, selected);
+                                        }
+                                        dismiss();
+                                    }
+                                }, 1000);
+
+                            }
+                        });
+                    }
+
+
+
                 }
             });
 
 
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -131,4 +160,16 @@ public class TimeLimitDialog extends DialogFragment {
         );
     }
 
+    private OnRangeSelectedListener mOnRangeSelectedListener;
+
+    public void setOnRangeSelectedListener(OnRangeSelectedListener onRangeSelectedListener) {
+        mOnRangeSelectedListener = onRangeSelectedListener;
+    }
+
+    private OnDateSelectedListener mOnDateSelectedListener;
+
+
+    public void setOnDateSelectedListener(OnDateSelectedListener onDateSelectedListener) {
+        mOnDateSelectedListener = onDateSelectedListener;
+    }
 }

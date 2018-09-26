@@ -659,9 +659,6 @@ public class MaterialCalendarView extends ViewGroup {
         requestLayout();
     }
 
-    public void setDay(int day) {
-        mDay = day;
-    }
 
     /**
      * @param tileSizeDp the new size for each tile in dips
@@ -1563,7 +1560,7 @@ public class MaterialCalendarView extends ViewGroup {
         }
 
         final int day = (int) ((mEndCalendarDay.getTimeInMillis() -
-                mStartCalendarDay.getTimeInMillis()) / 1000 / 60 / 60 / 24)+1;
+                mStartCalendarDay.getTimeInMillis()) / 1000 / 60 / 60 / 24) + 1;
         mDay = day;
         if (listener != null) {
             listener.onRangeSelected(MaterialCalendarView.this, mStartCalendarDay, mEndCalendarDay, day);
@@ -1709,7 +1706,7 @@ public class MaterialCalendarView extends ViewGroup {
 
 
         //当天以前的时间不能选中
-        if (selectedDate.isBefore(mCurrentAllDate)) {
+        if (selectedDate.isBefore(mCurrentAllDate) && selectionMode == SELECTION_MODE_RANGE) {
             Toast.makeText(getContext(), "请选择当天之前的时间", Toast.LENGTH_SHORT).show();
             return;
         }
