@@ -79,6 +79,7 @@ public class MaterialCalendarView extends ViewGroup {
      * 完整的当前时间
      */
     private CalendarDay mCurrentAllDate;
+    private TipView mTipView;
 
     /**
      * {@linkplain IntDef} annotation for selection mode.
@@ -463,19 +464,24 @@ public class MaterialCalendarView extends ViewGroup {
 
     private static final String TAG = "MaterialCalendarView";
 
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onLocationEvent(LocationEvent event) {
-
+        mTipView.setDayViewWidth(event.getDayViewWidth());
         if (event.isStart()) {//开始
-            ((TextView) mHintView.findViewById(R.id.tvTitle)).setText("选择结束日期");
+            mTipView.setText("选择结束日期");
             mHintView.post(new Runnable() {
                 @Override
                 public void run() {
+
                     if (event.isLeft()) {
                         mHintView.setTranslationX(event.getLocation()[0]);
+                        mTipView.setWhere(TipView.Where.WHERE_LEFT);
                     } else if (event.isRight()) {
+                        mTipView.setWhere(TipView.Where.WHERE_RIGHT);
                         mHintView.setTranslationX(event.getLocation()[0] - (mHintView.getWidth() - event.getDayViewWidth()));
                     } else {
+                        mTipView.setWhere(TipView.Where.WHERE_CENTER);
                         mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
                     }
 
@@ -483,7 +489,7 @@ public class MaterialCalendarView extends ViewGroup {
             });
         } else if (event.isEnd()) {
             if (event.isTheSameDay()) {
-                ((TextView) mHintView.findViewById(R.id.tvTitle)).setText(1 + "天");
+                mTipView.setText(1 + "天");
             } else {
 //                Calendar firstCalendar = getSelectedDates().get(0).getCalendar();
 //
@@ -491,21 +497,21 @@ public class MaterialCalendarView extends ViewGroup {
 //
 //                final int day = (int) ((lastCalendar.getTimeInMillis() -
 //                        firstCalendar.getTimeInMillis()) / 1000 / 60 / 60 / 24);
-                ((TextView) mHintView.findViewById(R.id.tvTitle)).setText(mDay + "天");
+                mTipView.setText(mDay + "天");
             }
-
-            mHintView.post(new Runnable() {
+            mTipView.requestLayout();
+            mTipView.post(new Runnable() {
                 @Override
                 public void run() {
-                    mHintView.setTranslationX(event.getLocation()[0] + (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
-
+                    mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
+                    mTipView.setWhere(TipView.Where.WHERE_CENTER);
                 }
             });
 
         }
 
 
-        mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight() / 2);
+        mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight()+dpToPx(5));
     }
 
     private void setupChildren() {
@@ -541,6 +547,7 @@ public class MaterialCalendarView extends ViewGroup {
 
     private View buildHintView() {
         mHintView = LayoutInflater.from(getContext()).inflate(R.layout.pop_hint, this, false);
+        mTipView = ((TipView) mHintView.findViewById(R.id.tvTitle));
         return mHintView;
     }
 
