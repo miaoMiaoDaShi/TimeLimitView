@@ -242,14 +242,14 @@ class DayView extends View {
         mIsTheSameDay = date.isTheSameDay();
 
 
-        if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE||!isInMonth) {
+        if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {
             return;
         }
-        if (date.isStrat() || date.isEnd()) {//开始
+        if ((date.isStrat() || date.isEnd())&&isInMonth) {//开始
             final int locations[] = new int[2];
             locations[0] = (int) getX();
             locations[1] = (int) getY();
-            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(), mIsLeft, mIsRight, mIsTheSameDay, getWidth()));
+            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(),date.isEndChecked(), mIsLeft, mIsRight, mIsTheSameDay, getWidth()));
         }
     }
 

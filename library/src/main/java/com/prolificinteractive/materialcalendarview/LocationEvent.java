@@ -15,7 +15,16 @@ public class LocationEvent {
     private boolean isLeft;
     private boolean isRight;
     private boolean isTheSameDay;
+    private boolean isSelectEnd ;
     private int dayViewWidth;
+
+    public boolean isSelectEnd() {
+        return isSelectEnd;
+    }
+
+    public void setSelectEnd(boolean selectEnd) {
+        isSelectEnd = selectEnd;
+    }
 
     public boolean isLeft() {
         return isLeft;
@@ -74,10 +83,11 @@ public class LocationEvent {
         isStart = start;
     }
 
-    public LocationEvent(int[] location, boolean isStart, boolean isEnd, boolean isLeft, boolean isRight,boolean isTheSameDay,int dayViewWidth ) {
+    public LocationEvent(int[] location, boolean isStart, boolean isEnd,boolean isSelectEnd, boolean isLeft, boolean isRight,boolean isTheSameDay,int dayViewWidth ) {
         this.location = location;
         this.isStart = isStart;
         this.isEnd = isEnd;
+        this.isSelectEnd = isSelectEnd;
         this.isLeft = isLeft;
         this.isRight = isRight;
         this.isTheSameDay = isTheSameDay;

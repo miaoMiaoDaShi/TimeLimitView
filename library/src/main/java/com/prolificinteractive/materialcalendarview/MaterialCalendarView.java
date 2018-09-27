@@ -218,13 +218,7 @@ public class MaterialCalendarView extends ViewGroup {
     private final OnClickListener onClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            pageChangeListener.onPageScrollStateChanged(ViewPager.SCROLL_STATE_DRAGGING);
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    pageChangeListener.onPageScrollStateChanged(ViewPager.SCROLL_STATE_IDLE);
-                }
-            }, 500);
+            onChangePage();
 
 
             if (v == buttonFuture) {
@@ -234,6 +228,16 @@ public class MaterialCalendarView extends ViewGroup {
             }
         }
     };
+
+    private void onChangePage() {
+        pageChangeListener.onPageScrollStateChanged(ViewPager.SCROLL_STATE_DRAGGING);
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                pageChangeListener.onPageScrollStateChanged(ViewPager.SCROLL_STATE_IDLE);
+            }
+        }, 500);
+    }
 
     private final ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
         @Override
@@ -468,7 +472,7 @@ public class MaterialCalendarView extends ViewGroup {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onLocationEvent(LocationEvent event) {
         mTipView.setDayViewWidth(event.getDayViewWidth());
-        if (event.isStart()) {//开始
+        if (event.isStart()&&!event.isSelectEnd()) {//开始
             mTipView.setText("选择结束日期");
             mHintView.post(new Runnable() {
                 @Override
@@ -484,10 +488,10 @@ public class MaterialCalendarView extends ViewGroup {
                         mTipView.setWhere(TipView.Where.WHERE_CENTER);
                         mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
                     }
-
+                    mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight() + dpToPx(5));
                 }
             });
-        } else if (event.isEnd()) {
+        } else if (event.isEnd()&&event.isSelectEnd()) {
             if (event.isTheSameDay()) {
                 mTipView.setText(1 + "天");
             } else {
@@ -504,6 +508,7 @@ public class MaterialCalendarView extends ViewGroup {
                 @Override
                 public void run() {
                     mHintView.setTranslationX(event.getLocation()[0] - (Math.abs(mHintView.getWidth() - event.getDayViewWidth())) / 2);
+                    mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight() + dpToPx(5));
                     mTipView.setWhere(TipView.Where.WHERE_CENTER);
                 }
             });
@@ -511,7 +516,7 @@ public class MaterialCalendarView extends ViewGroup {
         }
 
 
-        mHintView.setTranslationY(event.getLocation()[1] - topbar.getHeight()+dpToPx(5));
+
     }
 
     private void setupChildren() {
@@ -612,6 +617,7 @@ public class MaterialCalendarView extends ViewGroup {
      */
     public void goToPrevious() {
         if (canGoBack()) {
+            onChangePage();
             pager.setCurrentItem(pager.getCurrentItem() - 1, true);
         }
     }
@@ -623,6 +629,7 @@ public class MaterialCalendarView extends ViewGroup {
      */
     public void goToNext() {
         if (canGoForward()) {
+            onChangePage();
             pager.setCurrentItem(pager.getCurrentItem() + 1, true);
         }
     }
@@ -1648,6 +1655,7 @@ public class MaterialCalendarView extends ViewGroup {
                         }
                         date.setEnd(true);
                         firstDaySelected.setEndChecked(true);
+                        date.setEndChecked(true);
                         adapter.setDateSelected(firstDaySelected, true);
                         adapter.setDateSelected(date, true);
                     }
@@ -1712,27 +1720,29 @@ public class MaterialCalendarView extends ViewGroup {
         final CalendarDay selectedDate = dayView.getDate();
 
 
+        final int currentMonth = currentDate.getMonth();
+        final int selectedMonth = selectedDate.getMonth();
+//        if (currentMonth != selectedMonth) {
+//            return;
+//        }
+
+
         //当天以前的时间不能选中
-        if (selectedDate.isBefore(mCurrentAllDate) && selectionMode == SELECTION_MODE_RANGE) {
+        if (selectedDate.isBefore(mCurrentAllDate) && currentMonth == selectedMonth) {
             Toast.makeText(getContext(), "请选择当天之前的时间", Toast.LENGTH_SHORT).show();
             return;
         }
 
 
-        final int currentMonth = currentDate.getMonth();
-        final int selectedMonth = selectedDate.getMonth();
-        if (currentMonth != selectedMonth) {
-            return;
-        }
-
         if (calendarMode == CalendarMode.MONTHS
                 && allowClickDaysOutsideCurrentMonth
                 && currentMonth != selectedMonth) {
             if (currentDate.isBefore(selectedDate)) {
-                //goToNext();
+                goToNext();
             } else if (currentDate.isAfter(selectedDate)) {
-                // goToPrevious();
+                goToPrevious();
             }
+            return;
         }
 
         //重置状态
