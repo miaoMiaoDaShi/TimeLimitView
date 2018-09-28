@@ -198,7 +198,6 @@ abstract class CalendarPagerAdapter<V extends CalendarPagerView> extends PagerAd
     }
 
 
-
 //    public void setDateTextAppearance(int taId) {
 //        if (taId == 0) {
 //            return;
@@ -248,7 +247,7 @@ abstract class CalendarPagerAdapter<V extends CalendarPagerView> extends PagerAd
         }
 
         if (min == null) {
-            min = CalendarDay.from(today.getYear() , today.getMonth(), today.getDay());
+            min = CalendarDay.from(today.getYear() - 1, today.getMonth(), today.getDay());
         }
 
         if (max == null) {

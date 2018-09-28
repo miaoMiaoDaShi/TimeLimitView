@@ -230,6 +230,9 @@ public class MaterialCalendarView extends ViewGroup {
     };
 
     private void onChangePage() {
+        if (selectionMode!=SELECTION_MODE_RANGE) {
+            return;
+        }
         pageChangeListener.onPageScrollStateChanged(ViewPager.SCROLL_STATE_DRAGGING);
         postDelayed(new Runnable() {
             @Override
@@ -253,6 +256,9 @@ public class MaterialCalendarView extends ViewGroup {
 
         @Override
         public void onPageScrollStateChanged(int state) {
+            if (selectionMode!=SELECTION_MODE_RANGE) {
+                return;
+            }
             switch (state) {
                 case ViewPager.SCROLL_STATE_IDLE:
                     if (getSelectedDates().size() > 0 && getSelectedDates().get(getSelectedDates().size() - 1).getMonth() == currentMonth.getMonth()) {
