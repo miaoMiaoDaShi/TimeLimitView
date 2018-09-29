@@ -25,6 +25,7 @@ import com.prolificinteractive.materialcalendarview.format.DayFormatter;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.showDecoratedDisabled;
@@ -190,6 +191,8 @@ class DayView extends View {
 
     private void setEnabled() {
         boolean enabled = isInMonth && isInRange && !isDecoratedDisabled;
+
+
         super.setEnabled(isInRange && !isDecoratedDisabled);
 
         boolean showOtherMonths = showOtherMonths(showOtherDates);
@@ -245,11 +248,11 @@ class DayView extends View {
         if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {
             return;
         }
-        if ((date.isStrat() || date.isEnd())&&isInMonth) {//开始
+        if ((date.isStrat() || date.isEnd()) && isInMonth) {//开始
             final int locations[] = new int[2];
             locations[0] = (int) getX();
             locations[1] = (int) getY();
-            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(),date.isEndChecked(), mIsLeft, mIsRight, mIsTheSameDay, getWidth()));
+            EventBus.getDefault().post(new LocationEvent(locations, date.isStrat(), date.isEnd(), date.isEndChecked(), mIsLeft, mIsRight, mIsTheSameDay, getWidth()));
         }
     }
 
@@ -393,6 +396,8 @@ class DayView extends View {
      * @param canvas
      */
     private void drawDayText(Canvas canvas) {
+
+
         Paint.FontMetricsInt fontMetrics = mDayTextPaint.getFontMetricsInt();
         int baseline = (mDayTextRect.bottom + mDayTextRect.top - fontMetrics.bottom - fontMetrics.top) / 2;
         mDayTextPaint.setTextAlign(Paint.Align.CENTER);
@@ -404,6 +409,12 @@ class DayView extends View {
             mDayTextPaint.setColor(Color.parseColor(COLOR_OTHER_MONTH_DYA_TEXT));
         }
 
+        if (selectionMode == MaterialCalendarView.SELECTION_MODE_SINGLE) {
+            final CalendarDay today = CalendarDay.today();
+            if (today.isAfter(date)) {
+                mDayTextPaint.setColor(Color.parseColor(COLOR_OTHER_MONTH_DYA_TEXT));
+            }
+        }
         canvas.drawText(mCurrentDay, mDayTextRect.centerX(), baseline, mDayTextPaint);
     }
 
