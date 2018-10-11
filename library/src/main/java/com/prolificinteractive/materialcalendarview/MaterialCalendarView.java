@@ -1735,7 +1735,7 @@ public class MaterialCalendarView extends ViewGroup {
 
         //当天以前的时间不能选中
         if (selectedDate.isBefore(mCurrentAllDate) && currentMonth == selectedMonth) {
-            Toast.makeText(getContext(), "请选择当天之前的时间", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "请选择当天以后的时间", Toast.LENGTH_SHORT).show();
             return;
         }
 
